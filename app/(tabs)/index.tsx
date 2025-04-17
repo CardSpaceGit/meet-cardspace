@@ -4,8 +4,28 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { RequireAuth } from '@/app/utils/authUtils';
+import { useAuth } from '@clerk/clerk-expo';
+import { TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
-export default function HomeScreen() {
+export default function HomeScreenWrapper() {
+  return (
+    <RequireAuth>
+      <HomeScreen />
+    </RequireAuth>
+  );
+}
+
+function HomeScreen() {
+  const { signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/screens/SignInScreen');
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -18,6 +38,15 @@ export default function HomeScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">You are now logged in!</ThemedText>
+        <ThemedText>
+          This is a protected route that requires authentication.
+        </ThemedText>
+        <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
+          <ThemedText style={styles.signOutText}>Sign Out</ThemedText>
+        </TouchableOpacity>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
@@ -70,5 +99,16 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  signOutButton: {
+    backgroundColor: '#6c47ff',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  signOutText: {
+    color: 'white',
+    fontWeight: '600',
   },
 });
